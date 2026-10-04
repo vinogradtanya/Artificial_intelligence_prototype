@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Кабинет{% endblock %}
+{% block content %}
+<h1>Личный кабинет</h1>
+
+<div class="grid">
+  <div class="stat"><div class="n">🪙 {{ g.user.token_balance }}</div><div class="l">Баланс токенов</div></div>
+  <div class="stat"><div class="n">{{ g.user.tariff }}</div><div class="l">Текущий тариф</div></div>
+  <div class="stat"><div class="n">{{ stats.total }}</div><div class="l">Генераций</div></div>
+</div>
+
+<div class="card">
+  <h2>Профиль</h2>
+  <p class="muted">Логин: <b>{{ g.user.username }}</b> · Email: {{ g.user.email }} ·
+     Роль: {{ g.user.role }} · Зарегистрирован: {{ g.user.created_at }}</p>
+  <form method="post" action="{{ url_for('main.update_profile') }}">
+    <label for="email">Новый email (оставьте пустым, чтобы не менять)</label>
+    <input id="email" name="email" type="email" placeholder="{{ g.user.email }}">
+    <label for="password">Новый пароль (не обязательно)</label>
+    <input id="password" name="password" type="password">
+    <label for="password2">Повтор нового пароля</label>
+    <input id="password2" name="password2" type="password">
+    <button type="submit">Сохранить</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Пополнение баланса (имитация оплаты)</h2>
+  <p class="muted">Реальный платёж не производится: кнопка увеличивает баланс и пишет транзакцию.
+     Бонус к пополнению зависит от тарифа:
+     free — {{ (bonuses.free * 100)|round|int }}%,
+     pro — {{ (bonuses.pro * 100)|round|int }}%,
+     business — {{ (bonuses.business * 100)|round|int }}%.</p>
+  <form method="post" action="{{ url_for('main.topup') }}" class="row-flex">
+    <div>
+      <label for="amount">Сумма (в токенах)</label>
+      <input id="amount" name="amount" type="number" min="1" max="100000" value="500" required>
+    </div>
+    <div><button type="submit">Пополнить</button></div>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Тариф</h2>
+  <table>
+    <tr><th>Тариф</th><th>Коэффициент стоимости</th><th>Бонус пополнения</th><th>Стоимость генерации (текст/изобр./аудио)</th><th></th></tr>
+    {% for t in tariffs %}
+    <tr>
+      <td>{{ t }}{% if t == g.user.tariff %} <span class="badge success">текущий</span>{% endif %}</td>
+      <td>×{{ factors[t] }}</td>
+      <td>{{ (bonuses[t] * 100)|round|int }}%</td>
+      <td>{{ (token_cost.text * factors[t])|round|int }} / {{ (token_cost.image * factors[t])|round|int }} / {{ (token_cost.audio * factors[t])|round|int }}</td>
+      <td>
+        {% if t != g.user.tariff %}
+        <form method="post" action="{{ url_for('main.change_tariff') }}">
+          <input type="hidden" name="tariff" value="{{ t }}">
+          <button class="btn small" type="submit">Выбрать</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+<div class="card">
+  <h2>Последние транзакции</h2>
+  <table>
+    <tr><th>Дата</th><th>Операция</th><th>Сумма</th><th>Описание</th></tr>
+    {% for tx in transactions %}
+    <tr>
+      <td class="muted">{{ tx.created_at }}</td>
+      <td>{{ tx.kind }}</td>
+      <td>{{ '+' if tx.amount > 0 else '' }}{{ tx.amount }}</td>
+      <td class="muted">{{ tx.description }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="muted">Транзакций нет.</td></tr>
+    {% endfor %}
+  </table>
+  <p><a href="{{ url_for('reports.transactions') }}">Вся история транзакций →</a></p>
+</div>
+{% endblock %}

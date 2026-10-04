@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}AI-ассистент{% endblock %}
+{% block content %}
+<h1>AI-ассистент</h1>
+<p class="muted">
+  Помощник отвечает на вопросы о работе системы и помогает составить промпт.
+  Режим подсказок:
+  {% if llm_enabled %}<span class="badge success">LLM включён</span>
+  {% else %}<span class="badge">офлайн-справочник</span>{% endif %}
+</p>
+
+<div class="card">
+  <h2>Спросить о системе</h2>
+  <form method="post" action="{{ url_for('assistant.ask_route') }}">
+    <label for="question">Ваш вопрос</label>
+    <input id="question" name="question" value="{{ question }}" required
+           placeholder="Например: как пополнить баланс?">
+    <button type="submit">Спросить</button>
+  </form>
+  <p class="muted" style="margin-top:12px">
+    Популярные вопросы:
+    {% for q in questions %}
+      <a class="btn small secondary" href="{{ url_for('assistant.index', q=q) }}">{{ q }}</a>
+    {% endfor %}
+  </p>
+</div>
+
+{% if ask_result %}
+<div class="card">
+  <h2>Ответ <span class="badge">{{ ask_result.engine }}</span></h2>
+  {% if ask_result.source %}<p class="muted">Источник: {{ ask_result.source }}</p>{% endif %}
+  <pre class="result">{{ ask_result.answer }}</pre>
+  {% if ask_result.related %}
+  <p class="muted">Похожие темы:
+    {% for r in ask_result.related %}{{ r.title }}{% if not loop.last %}, {% endif %}{% endfor %}
+  </p>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="card">
+  <h2>Подсказка к промпту</h2>
+  <form method="post" action="{{ url_for('assistant.improve_route') }}">
+    <label for="content_type">Тип контента</label>
+    <select id="content_type" name="content_type">
+      {% for t in content_types %}
+      <option value="{{ t }}" {% if content_type == t %}selected{% endif %}>{{ t }}</option>
+      {% endfor %}
+    </select>
+    <label for="prompt">Ваш промпт</label>
+    <textarea id="prompt" name="prompt" required
+              placeholder="Например: кот на окне">{{ prompt }}</textarea>
+    <button type="submit">Подсказать</button>
+  </form>
+</div>
+
+{% if improve_result %}
+<div class="card">
+  <h2>Рекомендации <span class="badge">{{ improve_result.engine }}</span></h2>
+  <label>Улучшенный промпт</label>
+  <pre class="result">{{ improve_result.improved }}</pre>
+  {% if improve_result.llm_text %}
+    <label>Ответ LLM-ассистента</label>
+    <pre class="result">{{ improve_result.llm_text }}</pre>
+  {% endif %}
+  <label>Советы</label>
+  <ul>{% for h in improve_result.hints %}<li>{{ h }}</li>{% endfor %}</ul>
+</div>
+{% endif %}
+{% endblock %}

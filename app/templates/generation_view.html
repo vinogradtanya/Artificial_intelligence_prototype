@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Результат #{{ gen.id }}{% endblock %}
+{% block content %}
+<h1>Результат генерации #{{ gen.id }}</h1>
+
+<div class="card">
+  <p><span class="badge {{ gen.status }}">{{ gen.status }}</span>
+     <span class="badge">{{ gen.content_type }}</span>
+     <span class="muted">· {{ gen.created_at }} · токенов: {{ gen.tokens_spent }}</span></p>
+  <label>Промпт</label>
+  <pre class="result">{{ gen.prompt }}</pre>
+  <label>Параметры</label>
+  <pre class="result">{{ gen.params }}</pre>
+
+  <h2>Результат</h2>
+  {% if gen.status != 'success' %}
+    <p class="flash danger">{{ gen.result_text }}</p>
+  {% elif gen.content_type == 'text' %}
+    <pre class="result">{{ gen.result_text }}</pre>
+  {% elif gen.content_type == 'image' %}
+    <img class="thumb" src="{{ url_for('projects.media', rel_path=gen.result_path) }}" alt="Сгенерированное изображение">
+    <p><a class="btn small secondary" href="{{ url_for('projects.media', rel_path=gen.result_path) }}" download>Скачать PNG</a></p>
+  {% elif gen.content_type == 'audio' %}
+    <audio controls src="{{ url_for('projects.media', rel_path=gen.result_path) }}"></audio>
+    <p><a class="btn small secondary" href="{{ url_for('projects.media', rel_path=gen.result_path) }}" download>Скачать WAV</a></p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <form method="post" action="{{ url_for('projects.delete_generation', gen_id=gen.id) }}"
+        onsubmit="return confirm('Удалить запись?');">
+    <button class="btn danger" type="submit">Удалить из библиотеки</button>
+  </form>
+  <p><a href="{{ url_for('projects.library') }}">← Вернуться в библиотеку</a></p>
+</div>
+{% endblock %}

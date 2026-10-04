@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Администрирование{% endblock %}
+{% block content %}
+<h1>Панель администратора</h1>
+<p class="muted">
+  <a href="{{ url_for('admin.users') }}">Пользователи</a> ·
+  <a href="{{ url_for('admin.audit') }}">Журнал действий</a> ·
+  <a href="{{ url_for('reports.history', scope='all') }}">Все генерации</a> ·
+  <a href="{{ url_for('reports.transactions', scope='all') }}">Все транзакции</a>
+</p>
+
+<div class="grid">
+  <div class="stat"><div class="n">{{ stats.users_total }}</div><div class="l">Пользователей всего</div></div>
+  <div class="stat"><div class="n">{{ stats.users_blocked }}</div><div class="l">Заблокировано</div></div>
+  <div class="stat"><div class="n">{{ stats.users_admins }}</div><div class="l">Администраторов</div></div>
+  <div class="stat"><div class="n">{{ stats.gen_total }}</div><div class="l">Генераций всего</div></div>
+  <div class="stat"><div class="n">{{ stats.gen_success }}</div><div class="l">Успешных</div></div>
+  <div class="stat"><div class="n">{{ stats.gen_rejected }}</div><div class="l">Отклонено модерацией</div></div>
+  <div class="stat"><div class="n">{{ stats.tokens_spent }}</div><div class="l">Токенов израсходовано</div></div>
+</div>
+
+<div class="card">
+  <h2>Генерации по типам контента</h2>
+  <table>
+    <tr><th>Тип</th><th>Количество</th><th>Токенов</th></tr>
+    {% for r in stats.by_type %}
+    <tr><td>{{ r.content_type }}</td><td>{{ r.c }}</td><td>{{ r.tokens }}</td></tr>
+    {% else %}
+    <tr><td colspan="3" class="muted">Нет данных.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+
+<div class="card">
+  <h2>Распределение по тарифам</h2>
+  <table>
+    <tr><th>Тариф</th><th>Пользователей</th></tr>
+    {% for r in stats.by_tariff %}
+    <tr><td>{{ r.tariff }}</td><td>{{ r.c }}</td></tr>
+    {% else %}
+    <tr><td colspan="2" class="muted">Нет данных.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+
+<div class="card">
+  <h2>Топ активных пользователей</h2>
+  <table>
+    <tr><th>Пользователь</th><th>Генераций</th><th>Токенов</th></tr>
+    {% for r in stats.top_users %}
+    <tr><td>{{ r.username }}</td><td>{{ r.c }}</td><td>{{ r.tokens }}</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

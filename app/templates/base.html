@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}AI Content Studio{% endblock %} — учебный прототип</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">🧠 AI Content Studio <span class="tag">прототип</span></div>
+  <nav>
+    {% if g.user %}
+      <a href="{{ url_for('main.dashboard') }}">Дашборд</a>
+      <a href="{{ url_for('projects.new_project') }}">Генерация</a>
+      <a href="{{ url_for('projects.library') }}">Библиотека</a>
+      <a href="{{ url_for('reports.history') }}">История</a>
+      <a href="{{ url_for('reports.transactions') }}">Транзакции</a>
+      <a href="{{ url_for('main.cabinet') }}">Кабинет</a>
+      <a href="{{ url_for('assistant.index') }}">Ассистент</a>
+      {% if g.user.role == 'admin' %}<a href="{{ url_for('admin.index') }}">Админ</a>{% endif %}
+      <span class="balance">🪙 {{ g.user.token_balance }}</span>
+      <a href="{{ url_for('auth.logout') }}">Выйти ({{ g.user.username }})</a>
+    {% else %}
+      <a href="{{ url_for('auth.login') }}">Вход</a>
+      <a href="{{ url_for('auth.register') }}">Регистрация</a>
+    {% endif %}
+  </nav>
+</header>
+<main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-area">
+        {% for cat, msg in messages %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+<footer>
+  Учебный прототип · ГОСТ Р 59793-2021 · ГОСТ Р 57193-2025 · ГОСТ 34.602-2020 · ГОСТ Р 59792-2021
+</footer>
+</body>
+</html>

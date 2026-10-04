@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Журнал действий{% endblock %}
+{% block content %}
+<h1>Журнал действий администраторов</h1>
+<p class="muted"><a href="{{ url_for('admin.index') }}">← В панель администратора</a></p>
+
+<div class="card">
+  <table>
+    <tr><th>ID</th><th>Дата</th><th>Действие</th><th>Объект</th><th>Актор (user_id)</th></tr>
+    {% for e in entries %}
+    <tr>
+      <td>{{ e.id }}</td>
+      <td class="muted">{{ e.created_at }}</td>
+      <td>{{ e.action }}</td>
+      <td>{{ e.target }}</td>
+      <td>{{ e.actor_id }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5" class="muted">Записей нет.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

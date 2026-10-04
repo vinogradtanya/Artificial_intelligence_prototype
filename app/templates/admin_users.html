@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Пользователи{% endblock %}
+{% block content %}
+<h1>Управление пользователями</h1>
+<p class="muted"><a href="{{ url_for('admin.index') }}">← В панель администратора</a></p>
+
+<div class="card">
+  <table>
+    <tr><th>ID</th><th>Логин</th><th>Email</th><th>Роль</th><th>Тариф</th><th>Баланс</th><th>Регистрация</th><th>Статус</th><th></th></tr>
+    {% for u in users %}
+    <tr>
+      <td>{{ u.id }}</td>
+      <td>{{ u.username }}</td>
+      <td>{{ u.email }}</td>
+      <td>{{ u.role }}</td>
+      <td>{{ u.tariff }}</td>
+      <td>{{ u.token_balance }}</td>
+      <td class="muted">{{ u.created_at }}</td>
+      <td>
+        {% if u.is_blocked %}<span class="badge rejected">заблокирован</span>
+        {% else %}<span class="badge success">активен</span>{% endif %}
+      </td>
+      <td>
+        {% if u.id != g.user.id %}
+          {% if u.is_blocked %}
+          <form method="post" action="{{ url_for('admin.unblock_user', user_id=u.id) }}">
+            <button class="btn small" type="submit">Разблокировать</button>
+          </form>
+          {% else %}
+          <form method="post" action="{{ url_for('admin.block_user', user_id=u.id) }}">
+            <button class="btn small danger" type="submit">Заблокировать</button>
+          </form>
+          {% endif %}
+        {% else %}<span class="muted">это вы</span>{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

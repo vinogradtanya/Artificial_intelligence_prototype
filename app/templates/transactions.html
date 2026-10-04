@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Транзакции{% endblock %}
+{% block content %}
+<h1>История транзакций</h1>
+
+<div class="card">
+  <form method="get" class="filters">
+    <div><label for="date_from">Дата с</label><input id="date_from" name="date_from" type="date" value="{{ filters.date_from }}"></div>
+    <div><label for="date_to">Дата по</label><input id="date_to" name="date_to" type="date" value="{{ filters.date_to }}"></div>
+    {% if g.user.role == 'admin' %}
+    <div>
+      <label for="scope">Область</label>
+      <select id="scope" name="scope">
+        <option value="">Только мои</option>
+        <option value="all" {% if filters.scope == 'all' %}selected{% endif %}>Все пользователи</option>
+      </select>
+    </div>
+    {% endif %}
+    <div><button type="submit">Применить</button></div>
+  </form>
+  <p style="margin-top:14px">
+    <a class="btn small secondary" href="{{ url_for('reports.export_transactions', fmt='csv', **filters) }}">Экспорт CSV</a>
+    <a class="btn small secondary" href="{{ url_for('reports.export_transactions', fmt='json', **filters) }}">Экспорт JSON</a>
+  </p>
+</div>
+
+<div class="card">
+  {% if transactions %}
+  <table>
+    <tr><th>#</th>{% if filters.scope %}<th>Пользователь</th>{% endif %}<th>Дата</th><th>Операция</th><th>Сумма</th><th>Описание</th></tr>
+    {% for tx in transactions %}
+    <tr>
+      <td>{{ tx.id }}</td>
+      {% if filters.scope %}<td>{{ tx.username }}</td>{% endif %}
+      <td class="muted">{{ tx.created_at }}</td>
+      <td>{{ tx.kind }}</td>
+      <td>{{ '+' if tx.amount > 0 else '' }}{{ tx.amount }}</td>
+      <td class="muted">{{ tx.description }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">Транзакций не найдено.</p>
+  {% endif %}
+</div>
+{% endblock %}

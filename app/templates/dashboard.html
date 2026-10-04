@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Дашборд{% endblock %}
+{% block content %}
+<h1>Личный кабинет пользователя {{ g.user.username }}</h1>
+
+<div class="grid">
+  <div class="stat"><div class="n">🪙 {{ g.user.token_balance }}</div><div class="l">Баланс токенов</div></div>
+  <div class="stat"><div class="n">{{ stats.total }}</div><div class="l">Всего генераций</div></div>
+  <div class="stat"><div class="n">{{ stats.spent }}</div><div class="l">Израсходовано токенов</div></div>
+  <div class="stat"><div class="n">{{ g.user.tariff }}</div><div class="l">Тариф</div></div>
+</div>
+
+<div class="card">
+  <h2>Быстрые действия</h2>
+  <a class="btn" href="{{ url_for('projects.new_project') }}">Создать генерацию</a>
+  <a class="btn secondary" href="{{ url_for('projects.library') }}">Моя библиотека</a>
+  <a class="btn secondary" href="{{ url_for('main.cabinet') }}">Пополнить баланс</a>
+</div>
+
+<div class="card">
+  <h2>Статистика по типам контента</h2>
+  <table>
+    <tr><th>Тип</th><th>Количество</th></tr>
+    <tr><td>Текст</td><td>{{ stats.by_type.get('text', 0) }}</td></tr>
+    <tr><td>Изображение</td><td>{{ stats.by_type.get('image', 0) }}</td></tr>
+    <tr><td>Аудио</td><td>{{ stats.by_type.get('audio', 0) }}</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Последние генерации</h2>
+  {% if recent %}
+  <table>
+    <tr><th>#</th><th>Тип</th><th>Промпт</th><th>Статус</th><th>Дата</th></tr>
+    {% for gen in recent %}
+    <tr>
+      <td><a href="{{ url_for('projects.view_generation', gen_id=gen.id) }}">{{ gen.id }}</a></td>
+      <td>{{ gen.content_type }}</td>
+      <td>{{ gen.prompt[:60] }}{% if gen.prompt|length > 60 %}…{% endif %}</td>
+      <td><span class="badge {{ gen.status }}">{{ gen.status }}</span></td>
+      <td class="muted">{{ gen.created_at }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">Генераций пока нет.</p>
+  {% endif %}
+</div>
+{% endblock %}

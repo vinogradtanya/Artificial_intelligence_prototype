@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Библиотека{% endblock %}
+{% block content %}
+<h1>Моя библиотека</h1>
+
+<div class="card">
+  <form method="get" class="filters">
+    <div>
+      <label for="type">Тип контента</label>
+      <select id="type" name="type">
+        <option value="">Все</option>
+        {% for t in content_types %}
+        <option value="{{ t }}" {% if filters.type == t %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div><label for="date_from">Дата с</label><input id="date_from" name="date_from" type="date" value="{{ filters.date_from }}"></div>
+    <div><label for="date_to">Дата по</label><input id="date_to" name="date_to" type="date" value="{{ filters.date_to }}"></div>
+    <div><button type="submit">Применить</button></div>
+  </form>
+</div>
+
+<div class="card">
+  {% if generations %}
+  <table>
+    <tr><th>#</th><th>Тип</th><th>Промпт</th><th>Токены</th><th>Дата</th><th></th></tr>
+    {% for gen in generations %}
+    <tr>
+      <td>{{ gen.id }}</td>
+      <td>{{ gen.content_type }}</td>
+      <td>{{ gen.prompt[:70] }}{% if gen.prompt|length > 70 %}…{% endif %}</td>
+      <td>{{ gen.tokens_spent }}</td>
+      <td class="muted">{{ gen.created_at }}</td>
+      <td>
+        <a class="btn small secondary" href="{{ url_for('projects.view_generation', gen_id=gen.id) }}">Открыть</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">В библиотеке нет сохранённых результатов по заданным фильтрам.</p>
+  {% endif %}
+</div>
+{% endblock %}

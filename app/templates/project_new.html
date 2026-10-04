@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Новая генерация{% endblock %}
+{% block content %}
+<h1>Создание проекта генерации</h1>
+
+<div class="card">
+  <form method="post" id="gen-form">
+    <label for="content_type">Тип контента</label>
+    <select id="content_type" name="content_type" onchange="toggleParams()">
+      <option value="text">Текст</option>
+      <option value="image">Изображение</option>
+      <option value="audio">Аудио</option>
+    </select>
+
+    <label for="prompt">Промпт</label>
+    <textarea id="prompt" name="prompt" required
+      placeholder="Опишите, что нужно сгенерировать. Например: «стих про осень»"></textarea>
+
+    <div id="params-text">
+      <label for="length">Желаемая длина (символов, 0 — по умолчанию)</label>
+      <input id="length" name="length" type="number" min="0" max="5000" value="0">
+    </div>
+
+    <div id="params-image" style="display:none">
+      <label for="size">Размер изображения</label>
+      <select id="size" name="size">
+        <option>256x256</option>
+        <option selected>512x512</option>
+        <option>768x768</option>
+        <option>1024x1024</option>
+      </select>
+      <p class="muted">Изображение генерируется по промпту реальной AI-моделью
+         (сервис Pollinations.AI). Если сервис недоступен, будет создана заглушка.</p>
+    </div>
+
+    <div id="params-audio" style="display:none">
+      <label for="duration">Длительность заглушки (сек, 0.5–15)</label>
+      <input id="duration" name="duration" type="number" min="0.5" max="15" step="0.5" value="3">
+      <p class="muted">Промпт озвучивается реальным голосом Windows (движок SAPI5).
+         Параметр «длительность» влияет только на мелодию-заглушку, если синтез речи недоступен.</p>
+    </div>
+
+    <button type="submit">Сгенерировать</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Стоимость генерации</h2>
+  <p class="muted">Базовая стоимость: текст — {{ token_cost.text }}, изображение — {{ token_cost.image }},
+     аудио — {{ token_cost.audio }} токенов. Итоговая стоимость умножается на коэффициент тарифа
+     ({{ g.user.tariff }}: ×{{ factors[g.user.tariff] }}).</p>
+  <p>Ваш баланс: <b>🪙 {{ g.user.token_balance }}</b> токенов.</p>
+</div>
+
+<script>
+function toggleParams() {
+  var t = document.getElementById('content_type').value;
+  document.getElementById('params-text').style.display  = (t === 'text')  ? 'block' : 'none';
+  document.getElementById('params-image').style.display = (t === 'image') ? 'block' : 'none';
+  document.getElementById('params-audio').style.display = (t === 'audio') ? 'block' : 'none';
+}
+toggleParams();
+</script>
+{% endblock %}

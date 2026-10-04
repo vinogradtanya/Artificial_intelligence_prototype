@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}История генераций{% endblock %}
+{% block content %}
+<h1>История генераций</h1>
+
+<div class="card">
+  <form method="get" class="filters">
+    <div>
+      <label for="type">Тип контента</label>
+      <select id="type" name="type">
+        <option value="">Все</option>
+        {% for t in content_types %}
+        <option value="{{ t }}" {% if filters.type == t %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div><label for="date_from">Дата с</label><input id="date_from" name="date_from" type="date" value="{{ filters.date_from }}"></div>
+    <div><label for="date_to">Дата по</label><input id="date_to" name="date_to" type="date" value="{{ filters.date_to }}"></div>
+    {% if g.user.role == 'admin' %}
+    <div>
+      <label for="scope">Область</label>
+      <select id="scope" name="scope">
+        <option value="">Только мои</option>
+        <option value="all" {% if filters.scope == 'all' %}selected{% endif %}>Все пользователи</option>
+      </select>
+    </div>
+    {% endif %}
+    <div><button type="submit">Применить</button></div>
+  </form>
+  <p style="margin-top:14px">
+    <a class="btn small secondary" href="{{ url_for('reports.export_generations', fmt='csv', **filters) }}">Экспорт CSV</a>
+    <a class="btn small secondary" href="{{ url_for('reports.export_generations', fmt='json', **filters) }}">Экспорт JSON</a>
+  </p>
+</div>
+
+<div class="card">
+  {% if generations %}
+  <table>
+    <tr><th>#</th>{% if filters.scope %}<th>Пользователь</th>{% endif %}<th>Тип</th><th>Промпт</th><th>Статус</th><th>Токены</th><th>Дата</th></tr>
+    {% for gen in generations %}
+    <tr>
+      <td><a href="{{ url_for('projects.view_generation', gen_id=gen.id) }}">{{ gen.id }}</a></td>
+      {% if filters.scope %}<td>{{ gen.username }}</td>{% endif %}
+      <td>{{ gen.content_type }}</td>
+      <td>{{ gen.prompt[:60] }}{% if gen.prompt|length > 60 %}…{% endif %}</td>
+      <td><span class="badge {{ gen.status }}">{{ gen.status }}</span></td>
+      <td>{{ gen.tokens_spent }}</td>
+      <td class="muted">{{ gen.created_at }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">Записей не найдено.</p>
+  {% endif %}
+</div>
+{% endblock %}
